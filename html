@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bingo Natalino - Protocolo de Sobrevivência</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Mountains+of+Christmas:wght@700&family=Creepster&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --blood-red: #880808;
+            --blood-alpha: rgba(136, 8, 8, 0.6);
+            --xmas-green: #0d2a1a;
+            --gold-tarnish: #b8860b;
+            --snow-dead: #e0e0e0;
+            --dark-wood: #120a07;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: #050505;
+            background-image: 
+                radial-gradient(circle at center, rgba(102, 0, 0, 0.2) 0%, #050505 100%),
+                url('https://www.transparenttextures.com/patterns/snow.png');
+            font-family: 'Montserrat', sans-serif;
+            color: var(--snow-dead);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px 10px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .bingo-title {
+            font-family: 'Mountains of Christmas', cursive;
+            font-size: clamp(3rem, 10vw, 5rem);
+            color: var(--blood-red);
+            text-shadow: 2px 2px 0px black, 0 0 20px rgba(255, 0, 0, 0.3);
+            line-height: 0.9;
+        }
+
+        .sub-title {
+            font-family: 'Cinzel', serif;
+            font-size: 0.9rem;
+            color: var(--gold-tarnish);
+            letter-spacing: 3px;
+            margin-top: 10px;
+            text-transform: uppercase;
+        }
+
+        .bingo-card {
+            background-color: var(--dark-wood);
+            background-image: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://www.transparenttextures.com/patterns/dark-wood.png');
+            padding: clamp(10px, 4vw, 20px);
+            border-radius: 8px;
+            border: 4px double var(--blood-red);
+            box-shadow: 0 0 50px rgba(0,0,0,1);
+            width: 100%;
+            max-width: 450px;
+            position: relative;
+        }
+
+        .bingo-letters {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            margin-bottom: 10px;
+            border-bottom: 2px solid var(--gold-tarnish);
+            padding-bottom: 5px;
+        }
+
+        .letter {
+            font-family: 'Creepster', cursive;
+            font-size: clamp(2rem, 8vw, 3rem);
+            color: var(--snow-dead);
+            text-align: center;
+        }
+
+        .bingo-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: clamp(5px, 2vw, 10px);
+        }
+
+        .cell {
+            aspect-ratio: 1 / 1;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(184, 134, 11, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(1.1rem, 5vw, 1.6rem);
+            font-weight: 900;
+            cursor: pointer;
+            transition: 0.2s;
+            position: relative;
+            user-select: none;
+            color: var(--snow-dead);
+            overflow: hidden;
+        }
+
+        .cell:hover {
+            background: rgba(102, 0, 0, 0.1);
+            border-color: var(--gold-tarnish);
+        }
+
+        /* Marcação: Sangue Translúcido que mantém o número visível */
+        .cell.marked::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(circle, var(--blood-alpha) 0%, transparent 80%);
+            z-index: 1;
+        }
+
+        .cell.marked::after {
+            content: '\f2dc'; /* Floco de neve */
+            font-family: "Font Awesome 6 Free";
+            position: absolute;
+            font-size: 2.5rem;
+            color: rgba(0, 0, 0, 0.3);
+            z-index: 0;
+            opacity: 0.5;
+        }
+
+        .cell span {
+            position: relative;
+            z-index: 2; /* Número sempre por cima de tudo */
+            text-shadow: 2px 2px 4px black;
+        }
+
+        .cell.free-space {
+            color: var(--gold-tarnish);
+            background: rgba(13, 42, 26, 0.4);
+        }
+
+        .footer-info {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 0.7rem;
+            color: #555;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            line-height: 1.5;
+        }
+
+        .id-highlight {
+            color: var(--blood-red);
+            font-weight: bold;
+            font-family: monospace;
+            font-size: 1rem;
+        }
+
+        /* Esconder controles inúteis para o jogador */
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            max-width: 450px;
+        }
+
+        .btn-print {
+            flex: 1;
+            background: transparent;
+            border: 1px solid #333;
+            color: #666;
+            padding: 10px;
+            cursor: pointer;
+            font-family: 'Cinzel', serif;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+        }
+
+        @media print {
+            .controls, .footer-info span:not(.id-label) { display: none !important; }
+            body { background: white !important; color: black !important; }
+            .bingo-card { border: 2px solid black; background: white !important; box-shadow: none; }
+            .cell { border: 1px solid black; color: black !important; background: transparent !important; }
+            .cell span { text-shadow: none; }
+            .cell.marked::before { background: rgba(136, 8, 8, 0.2); }
+            .bingo-title, .sub-title, .letter { color: black !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1 class="bingo-title">BINGO</h1>
+        <p class="sub-title">Natal Amaldiçoado</p>
+    </div>
+
+    <div class="bingo-card">
+        <div class="bingo-letters">
+            <div class="letter">B</div>
+            <div class="letter">I</div>
+            <div class="letter">N</div>
+            <div class="letter">G</div>
+            <div class="letter">O</div>
+        </div>
+        <div class="bingo-grid" id="bingoGrid">
+            <!-- Gerado via Script -->
+        </div>
+    </div>
+
+    <div class="footer-info">
+        <span class="id-label">Assinatura Digital da Cartela:</span><br>
+        <span class="id-highlight" id="displayID">---</span><br>
+        <span>Os números são definitivos para este ID.</span>
+    </div>
+
+    <div class="controls">
+        <button class="btn-print" onclick="window.print()">
+            <i class="fa-solid fa-print"></i> Gerar Comprovante (PDF)
+        </button>
+    </div>
+
+    <script>
+        // Função para gerar números aleatórios baseados em uma semente (Seed)
+        // Isso garante que o ID na URL sempre gere os mesmos números.
+        function seededRandom(seed) {
+            const x = Math.sin(seed++) * 10000;
+            return x - Math.floor(x);
+        }
+
+        function getSeededNumbers(min, max, count, seed) {
+            const nums = [];
+            const available = Array.from({length: max - min + 1}, (_, i) => i + min);
+            
+            for (let i = 0; i < count; i++) {
+                const randomIndex = Math.floor(seededRandom(seed + i) * available.length);
+                nums.push(available.splice(randomIndex, 1)[0]);
+            }
+            return nums.sort((a, b) => a - b);
+        }
+
+        function getCardID() {
+            const urlParams = new URLSearchParams(window.location.search);
+            let id = urlParams.get('id');
+            
+            if (!id) {
+                // Se não tem ID, gera um de 6 dígitos e atualiza a URL sem recarregar
+                id = Math.floor(100000 + Math.random() * 900000);
+                const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?id=' + id;
+                window.history.replaceState({path:newUrl}, '', newUrl);
+            }
+            return id;
+        }
+
+        function initBingo() {
+            const cardID = getCardID();
+            document.getElementById('displayID').innerText = "#" + cardID;
+            
+            const grid = document.getElementById('bingoGrid');
+            grid.innerHTML = '';
+
+            // Lógica de colunas (Semente usa o cardID para ser única)
+            const seed = parseInt(cardID);
+            const b = getSeededNumbers(1, 15, 5, seed + 100);
+            const i = getSeededNumbers(16, 30, 5, seed + 200);
+            const n = getSeededNumbers(31, 45, 4, seed + 300);
+            const g = getSeededNumbers(46, 60, 5, seed + 400);
+            const o = getSeededNumbers(61, 75, 5, seed + 500);
+
+            const columns = [b, i, n, g, o];
+            
+            // Recuperar marcações salvas
+            const savedMarks = JSON.parse(localStorage.getItem('marks_' + cardID) || '[]');
+
+            for (let row = 0; row < 5; row++) {
+                for (let col = 0; col < 5; col++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    const cellIndex = (row * 5) + col;
+                    
+                    if (row === 2 && col === 2) {
+                        cell.classList.add('free-space');
+                        cell.innerHTML = '<span><i class="fa-solid fa-tree"></i></span>';
+                        // Espaço livre sempre marcado
+                        cell.classList.add('marked');
+                    } else {
+                        let val;
+                        if (col === 2) {
+                            val = row < 2 ? columns[col][row] : columns[col][row - 1];
+                        } else {
+                            val = columns[col][row];
+                        }
+                        
+                        cell.innerHTML = `<span>${val}</span>`;
+                        
+                        // Aplicar marcação salva
+                        if (savedMarks.includes(cellIndex)) {
+                            cell.classList.add('marked');
+                        }
+
+                        cell.onclick = function() {
+                            this.classList.toggle('marked');
+                            updateStorage(cardID);
+                        };
+                    }
+                    grid.appendChild(cell);
+                }
+            }
+        }
+
+        function updateStorage(id) {
+            const markedCells = [];
+            document.querySelectorAll('.cell').forEach((cell, index) => {
+                if (cell.classList.contains('marked')) {
+                    markedCells.push(index);
+                }
+            });
+            localStorage.setItem('marks_' + id, JSON.stringify(markedCells));
+        }
+
+        window.onload = initBingo;
+    </script>
+</body>
+</html>
+
